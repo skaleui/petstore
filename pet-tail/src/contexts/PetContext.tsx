@@ -1,6 +1,10 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
 import http from "../util/http";
 import PetType from '../types/Pet';
+import { GET_PETS } from "../constants/query";
+// import { useQuery } from "@apollo/react-hooks";
+import { useQuery } from "@apollo/client";
+
 
 interface PetInterface {
   pets: PetType[],
@@ -104,10 +108,17 @@ export const PetProvider: React.FC<{children?: ReactNode}> = ({children}) => {
     setPets(responseArr);  
   },[])
 
+  const { loading, error, data} = useQuery(GET_PETS);
+
   useEffect( ()=> {
 
-    readAllPets();
-  }, [readAllPets]);
+    if(data) {
+      const responseArr = data.pets.data.map((item: any) => { return { id:item.id, ...item.attributes } });
+      console.log('get pets', responseArr);
+      setPets(responseArr);  
+    }
+
+  }, [data]);
 
   const value:PetInterface = {
     pets,
@@ -126,9 +137,9 @@ export const PetProvider: React.FC<{children?: ReactNode}> = ({children}) => {
   };
   
   return (
-    <PetContext.Provider value={value}>
-      {children}
-    </PetContext.Provider>
+      <PetContext.Provider value={value}>
+        {children}
+      </PetContext.Provider>
   )
 };
 
