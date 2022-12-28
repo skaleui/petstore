@@ -8,7 +8,8 @@ const link = new HttpLink({
 
 const client = new ApolloClient({
   cache, 
-  link
+  link,
+  connectToDevTools: true
 })
 
 // const client = new ApolloClient({

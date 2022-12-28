@@ -1,9 +1,10 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
 import http from "../util/http";
 import PetType from '../types/Pet';
-import { GET_PETS } from "../constants/query";
-// import { useQuery } from "@apollo/react-hooks";
-import { useQuery } from "@apollo/client";
+import { GET_PETS, ADD_PET, UPDATE_PET, DELETE_PET } from "../constants/query";
+import { useQuery, useMutation } from "@apollo/client";
+import { client } from '../util/apolloClient'
+import { pid } from "process";
 
 
 interface PetInterface {
@@ -12,8 +13,8 @@ interface PetInterface {
   petId: string,
   showModal: boolean,
   // selectedPets: [],
-  createNewPet?: (data:string)=> void,
-  updatePet?: (petId: string, data: string)=> void,
+  createNewPet?: (data:{})=> void,
+  updatePet?: (petId: string, data: {})=> void,
   deletePet?: (petId: string)=> void,
   changeNavValue?: (value: string)=> void,
   getPetId?: (id: string)=> void,
@@ -45,22 +46,41 @@ export const PetProvider: React.FC<{children?: ReactNode}> = ({children}) => {
   const [selectedPets, setSelectedPets] = useState<any[]>([]);
 
   // new pet
-  const createNewPet = async (data:string)=> {
-    await http.post("/api/pets", data);
-    getpets();
+  const createNewPet = async (petdata:{})=> {
+  
+    let newdata = {...petdata, publishedAt: new Date()}
+
+    client.mutate({
+      mutation: ADD_PET,
+      variables: { data: newdata }
+    })
+    .catch((error)=>{
+      console.log(error);
+    })
+  
   }
 
   //update a pet
-  const updatePet = async (petId: string, data: string)=> {
-     await http.put(`api/pets/${petId}`,data);
-    getpets();
+  const updatePet = async (petId: string, data: {})=> {
+
+    client.mutate({
+      mutation: UPDATE_PET,
+      variables: {pid: petId, updateData: data}
+    }).catch((error) => {
+      console.log(error)
+    })
   };
  
 
   //delete a pet
   const deletePet = async (petId: string) => {
-    await http.delete(`/api/pets/${petId}`);
-    getpets();
+    client.mutate({
+      mutation: DELETE_PET,
+      variables: { pid: petId}
+    }).catch((error)=>{
+      console.log(error);
+    })
+
   };
 
   //change nav
@@ -108,8 +128,8 @@ export const PetProvider: React.FC<{children?: ReactNode}> = ({children}) => {
     setPets(responseArr);  
   },[])
 
+ 
   const { loading, error, data} = useQuery(GET_PETS);
-
   useEffect( ()=> {
 
     if(data) {

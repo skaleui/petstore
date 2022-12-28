@@ -10,22 +10,34 @@ const PetModal: React.FC<({showOpen?: boolean, addAction?: string, modal: typeof
   const [name, setName] = useState<string | ''>("");
   const [animal, setAnimal] = useState<string | ''>("");
   const [breed, setBreed] = useState<string | ''>("");
-  const [age, setAge] = useState("");
+  const [age, setAge] = useState(0);
   const [location, setLocation] = useState("");
   const [sex, setSex] = useState("");
 
   const { createNewPet, updatePet, deletePet, changeNavValue, setShowModal, getSelectedPet } = usePetContext();
 
+  interface dataObject {
+    "id"?: string | "",
+    "name": string,
+    "animal": string,
+    "breed"?: string,
+    "age"?: number,
+    "location"?: string,
+    "sex"?: string
+  };
+
+  let newobject: dataObject = {
+    "id": id,
+    "name": name,
+    "animal": animal,
+    "breed": breed,
+    "age": age,
+    "location": location,
+    "sex": sex
+  }
+
   const data = {
-    "data": {
-      "id": id,
-      "name": name,
-      "animal": animal,
-      "breed": breed,
-      "age": age,
-      "location": location,
-      "sex": sex
-    }
+      data: {...newobject }
   }
 
   useEffect(()=> {
@@ -35,7 +47,7 @@ const PetModal: React.FC<({showOpen?: boolean, addAction?: string, modal: typeof
 
       console.log('useEffect', sPet);
       unstable_batchedUpdates( ()=> {
-        setId(sPet.id);
+        setId(sPet.id); 
         setName(sPet.name);
         setAge(sPet.age);
         setAnimal(sPet.animal);
@@ -48,15 +60,17 @@ const PetModal: React.FC<({showOpen?: boolean, addAction?: string, modal: typeof
 
 
   const handleSubmitPet = (event:any)=> {
+    let petid = data.data.id;
+    delete data.data.id;
     switch(addAction) {
       case "add": 
-        createNewPet?.(JSON.stringify(data));
+        createNewPet?.(data.data);
         break;
       case "edit": 
-        updatePet?.(data?.data?.id, JSON.stringify(data));
+        updatePet?.(petid!, data.data);
         break;
       case "del":
-        deletePet?.(data?.data?.id);
+        deletePet?.(petid!);
         break;
       default:
         break;
@@ -135,7 +149,7 @@ const PetModal: React.FC<({showOpen?: boolean, addAction?: string, modal: typeof
                       value={age}
                       autoComplete='age'
                       className='mt-1 ml-5 block w-full flex-1 rounded-md text-gray-600 border border-gray-400 hover:border-sky-500'
-                      onChange={(e)=>setAge(e.target.value)}/>
+                      onChange={(e)=>setAge(parseInt(e.target.value))}/>
                   </div>
                   <div className='flex col-span-3 items-center sm:col-span-3'>
                     <span className='inline-flex items-center text-sm font-medium text-gray-700'>Sex</span>

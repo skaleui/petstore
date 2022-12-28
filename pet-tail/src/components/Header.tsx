@@ -36,7 +36,7 @@ export default function Header() {
             console.log('selectedPets', selectedPets);
             setAction("edit");
             if(selectedPets && Object.keys(selectedPets).length === 1) {
-              // setShowModal?.(!showModal, selectedPets)
+              setShowModal?.(!showModal, selectedPets)
             } else {
               console.log('error');
               setShowError({open:true, title: "Error", message:'Select only 1 pet'});
